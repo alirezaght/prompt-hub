@@ -32,5 +32,5 @@ def make_prompt_fn(prompt: PromptSchema):
 def register_prompts(mcp: FastMCP):    
     for prompt in load_json_templates(PromptSchema, "prompts/"):
         async_fn = make_prompt_fn(prompt)
-        final_prompt = Prompt.from_function(async_fn, title=prompt.title, description=prompt.description)
+        final_prompt = Prompt.from_function(async_fn, name=prompt.title, title=prompt.title, description=prompt.description)
         mcp.add_prompt(final_prompt)
