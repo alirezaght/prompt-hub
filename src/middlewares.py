@@ -32,7 +32,6 @@ def register_middlewares(app):
             or request.client.host
         )
         client_ip = client_ip.split(",")[0].strip()
-        logger.info(f"Client IP: {client_ip}")
         if not is_cloudflare_ip(client_ip):
             logger.error(f"Access denied for IP: {client_ip}")
             raise HTTPException(status_code=403, detail="Access denied: Only requests from Cloudflare are allowed.")
