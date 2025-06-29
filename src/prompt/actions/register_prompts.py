@@ -4,7 +4,7 @@ import inspect
 from mcp.server.fastmcp import FastMCP
 from utils.json_loader import load_json_templates
 from mcp.server.fastmcp.prompts.base import Prompt
-
+from utils.get_type import get_type
 
 def make_prompt_fn(prompt: PromptSchema):
     args = prompt.args
@@ -16,11 +16,11 @@ def make_prompt_fn(prompt: PromptSchema):
                 text = text.replace(f"{{{k}}}", str(v))
             return [Message(role=_role, content=text)]
         # Properly annotate the function
-        f.__annotations__ = {a['name']: a['type'] for a in args}
+        f.__annotations__ = {a['name']: get_type(a['type']) for a in args}
         return f
 
     params = [
-        inspect.Parameter(arg["name"], inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=arg["type"])
+        inspect.Parameter(arg["name"], inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=get_type(arg["type"]))
         for arg in args
     ]
     async_fn = prompt_func_factory(prompt.content, prompt.role)

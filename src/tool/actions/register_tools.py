@@ -3,6 +3,7 @@ import inspect
 from mcp.server.fastmcp import FastMCP
 from utils.json_loader import load_json_templates
 from middleware.context import get_current_request
+from utils.get_type import get_type
 
 def make_tool_fn(resource: ToolSchema):
     args = resource.args
@@ -15,11 +16,11 @@ def make_tool_fn(resource: ToolSchema):
             response = requests.post(uri, json=json)
             return response.text
         # Properly annotate the function
-        f.__annotations__ = {a['name']: a['type'] for a in args}
+        f.__annotations__ = {a['name']: get_type(a['type']) for a in args}
         return f
 
     params = [
-        inspect.Parameter(arg["name"], inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=arg["type"])
+        inspect.Parameter(arg["name"], inspect.Parameter.POSITIONAL_OR_KEYWORD, annotation=get_type(arg["type"]))
         for arg in args
     ]
     async_fn = tool_func_factory(resource.uri)
