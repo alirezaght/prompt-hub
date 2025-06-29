@@ -69,7 +69,8 @@ Want to add a new prompt, resource, or tool to the hub? Contact me with your tem
             "type": "str"
         }
     ],
-    "content": "Your resource content with {parameter_name} placeholders"
+    "uri": "Your resource uri this will be called via GET request passing all the args as query parameter",
+    "mime_type": "application/json"
 }
 ```
 
@@ -85,7 +86,8 @@ Want to add a new prompt, resource, or tool to the hub? Contact me with your tem
             "type": "str"
         }
     ],
-    "content": "Your tool implementation with {parameter_name} placeholders"
+    "uri": "This uri will be called via POST request passing all the args along with the userInfo in the request's body",
+    "mime_type": "application/json"
 }
 ```
 
