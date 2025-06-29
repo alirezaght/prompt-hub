@@ -14,4 +14,6 @@ class BaseMCPModel(BaseModel):
     title: str = ""
     description: str = ""
     args: list[dict] = []
+    version: int = 0
+    
     

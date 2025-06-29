@@ -4,6 +4,7 @@ import inspect
 from mcp.server.fastmcp import FastMCP
 from utils.json_loader import load_json_templates
 from mcp.server.fastmcp.prompts.base import Prompt
+from fastapi import UploadFile
 
 
 def make_prompt_fn(prompt: PromptSchema):
