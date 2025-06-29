@@ -1,7 +1,7 @@
 from base.logger import get_logger
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
-from base.user import UserInfo
+from src.base.schema import UserInfo
 
 logger = get_logger(__name__)
 

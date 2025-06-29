@@ -1,10 +1,6 @@
-from pydantic import BaseModel
+from base.schema import BaseMCPModel
 
-class PromptSchema(BaseModel):
-    prompt_name: str
-    prompt_title: str
-    prompt_desc: str = ""
-    prompt_args: list[dict] = []
+class PromptSchema(BaseMCPModel):    
     content: str
     role: str = "user"
     

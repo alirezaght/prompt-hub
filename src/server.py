@@ -5,13 +5,13 @@ from static.oauth_protected import oauth_protected_resource
 from middleware.cloudflare import cloudflare_middleware
 from middleware.oauth import oath_middleware
 from prompt.actions.register_prompts import register_prompts
+from middleware.context import RequestContextMiddleware
 
 from base.logger import get_logger
 
 logger = get_logger(__name__)
 
 
-# -- MCP Setup --
 mcp = FastMCP("Prompt Hub")
 
  
@@ -31,6 +31,13 @@ register_prompts(mcp)
 cloudflare_middleware(app)
 
 oath_middleware(app, "/mcp")
+
+app.add_middleware(
+    RequestContextMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.add_middleware(
     CORSMiddleware,

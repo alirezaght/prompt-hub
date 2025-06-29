@@ -8,3 +8,10 @@ class UserInfo(BaseModel):
     model_config = {
         "extra": "allow",        
     }
+    
+class BaseMCPModel(BaseModel):    
+    name: str = ""
+    title: str = ""
+    description: str = ""
+    args: list[dict] = []
+    

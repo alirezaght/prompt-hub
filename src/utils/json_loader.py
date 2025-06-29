@@ -1,22 +1,25 @@
-from ..schema import PromptSchema
-from typing import Dict
-from firebase import bucket
+from typing import List, Type, TypeVar
+from pydantic import BaseModel, ValidationError
 import json
 from base.logger import get_logger
-from pydantic import ValidationError
+from firebase import bucket
 
 logger = get_logger(__name__)
 
-def load_json_templates(prefix="prompts/") -> Dict[str, PromptSchema]:
+T = TypeVar("T", bound=BaseModel)
+
+def load_json_templates(
+    model: Type[T], 
+    prefix: str
+) -> List[T]:
     blobs = bucket.list_blobs(prefix=prefix)
-    templates = {}
+    templates = []
     for blob in blobs:
         if blob.name.endswith(".json"):
             try:
                 data = json.loads(blob.download_as_text())
-                prompt = PromptSchema(**data)
-                templates[prompt.prompt_name] = prompt
-                logger.info(f"Loaded prompt: {prompt.prompt_name}")
+                obj = model(**data)
+                templates.append(obj)
             except ValidationError as e:
                 logger.error(f"Error loading {blob.name}: {e}")
     return templates
