@@ -27,4 +27,7 @@ def get_from_cache(key: str):
         data = doc.to_dict()
         if 'expiration' in data and data['expiration'] > firestore.SERVER_TIMESTAMP:
             return data['value']
+        else:
+            # Cache entry has expired, remove it
+            db.collection('cache').document(key).delete()
     return None
