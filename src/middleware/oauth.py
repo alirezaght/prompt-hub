@@ -2,11 +2,16 @@ from base.logger import get_logger
 from fastapi import Request, HTTPException
 from fastapi.responses import JSONResponse
 from src.base.schema import UserInfo
+from base.cache import get_from_cache, put_to_cache
 
 logger = get_logger(__name__)
 
 def verifier(token: str):
     try:
+        cache = get_from_cache(token)
+        if cache:
+            logger.info(f"Token found in cache: {token}, {cache}")
+            return UserInfo(**cache)
         import httpx
         logger.info(f"Raw token: {token}")        
         headers = {"Authorization": f"Bearer {token}"}
@@ -17,6 +22,7 @@ def verifier(token: str):
             logger.error("Client ID not found in token payload")
             raise HTTPException("Client ID not found in token payload")
         data = {**decoded, **{"client_id": client_id}}
+        put_to_cache(token, data, expiration=3600)  # Cache for 1 hour
         return UserInfo(**data) 
     except Exception as e:
         logger.error(f"HTTP error while verifying token: {e}")

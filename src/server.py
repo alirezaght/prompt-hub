@@ -5,7 +5,7 @@ from static.oauth_protected import oauth_protected_resource
 from middleware.cloudflare import cloudflare_middleware
 from middleware.oauth import oath_middleware
 from prompt.actions.register_prompts import register_prompts
-from middleware.context import RequestContextMiddleware
+from middleware.context import context_middleware
 
 from base.logger import get_logger
 
@@ -32,12 +32,7 @@ cloudflare_middleware(app)
 
 oath_middleware(app, "/mcp")
 
-app.add_middleware(
-    RequestContextMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+context_middleware(app)
 
 app.add_middleware(
     CORSMiddleware,
@@ -45,5 +40,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
 
 
