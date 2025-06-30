@@ -14,6 +14,7 @@ def verifier(token: str):
         import httpx
         headers = {"Authorization": f"Bearer {token}"}
         response = httpx.get("https://prompt-hub.eu.auth0.com/userinfo", headers=headers)
+        response.raise_for_status()
         decoded = response.json()
         client_id = decoded.get(f"https://prompt-hub.ai/client_id")
         if not client_id:
@@ -23,24 +24,36 @@ def verifier(token: str):
         put_to_cache(token, data, expiration=3600)  # Cache for 1 hour
         return UserInfo(**data) 
     except Exception as e:
+        if isinstance(e, httpx.HTTPStatusError):
+            if e.response.status_code == 401:
+                logger.error("Unauthorized access: Invalid token")
+                raise HTTPException(status_code=401, detail="Unauthorized access: Invalid token")
+            elif e.response.status_code == 403:
+                logger.error("Forbidden access: Token does not have the required permissions")
+                raise HTTPException(status_code=403, detail="Forbidden access: Token does not have the required permissions")
+            else:
+                logger.error(f"HTTP error while verifying token: {e.response.status_code} - {e.response.text}")
+                raise HTTPException(status_code=e.response.status_code, detail=f"HTTP error while verifying token: {e.response.text}")
         logger.error(f"HTTP error while verifying token: {e}")
-        raise ValueError(f"HTTP error while verifying token: {e}")
+        raise HTTPException(f"HTTP error while verifying token: {e}", status_code=500)
 
 def oath_middleware(app, path_prefix="/mcp"):    
     @app.middleware("http")
     async def oauth_check(request: Request, call_next):
         # Code before passing to the next handler (e.g. logging, modify request)
-        print(f"Request: {request.method} {request.url}")
+        logger.info(f"Request: {request.method} {request.url}")
         if request.url.path.startswith(path_prefix):        
             token = request.headers.get("Authorization").split(" ")[-1] if request.headers.get("Authorization") else None
             if not token:
                 return JSONResponse({"error": "Authorization header missing"}, status_code=401)
-            
-            user = verifier(token)
-            if not user:
-                return JSONResponse({"error": "Invalid token"}, status_code=401)
-            
-            request.state.user = user
+            try:
+                user = verifier(token)
+                if not user:
+                    return JSONResponse({"error": "Invalid token"}, status_code=401)
+                
+                request.state.user = user
+            except HTTPException as e:                
+                return JSONResponse({"error": str(e)}, status_code=e.status_code)
         
         response = await call_next(request)        
 
